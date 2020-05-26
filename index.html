@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="v6.3.1-dist/ol.css">
+        <script  type="text/javascript" src="v6.3.1-dist/ol.js"></script>
+        <script type="text/javascript" src="js/jquary.js"></script>
+        <link rel="stylesheet" href="css/a.css">
+    </head>
+    <body>
+        <div id="my_dialog" title="NEW"  style="display: none" >
+            <form>
+                <p>name:<input type="text" id="name" /></p>
+                <p>kind：<input type="text" id="kind" /></p>
+
+                </p>
+                <div >
+                   <button id = 'cancle' >取消</button>
+                   <button id ='save' >保存</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="map" >
+        </div>
+        <div>   
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+        </div>
+
+        <button id= "addbtn">add</button>
+        <br><br>
+        SEARCH:<br>
+        <input type="text" id="POI" value="Mickey">
+        <button id = "btn" >Search</button>
+        <br><br>
+        <h1>result</h1>
+        <br>
+        <table id = 'result' >
+            <tr>
+                <td>name</td>
+                <td>label</td>
+                <td>position</td>
+                <td>定位</td>
+                
+            </tr>
+        </table>
+
+
+        <script src="js/map.js"></script>
+    </body>
+</html>
