@@ -113,6 +113,7 @@ function show(){
 }
 function create_paper_save(){
     cl = false;
+    alert("请点击地图位置")
     map.on('click', function(evt){
         if(!cl){
         var gname = [$("#name").val(),$("#kind").val()]
@@ -128,7 +129,18 @@ function create_paper_save(){
         vectorSource.addFeature(newFeature);
         $("#my_dialog").hide();
         cl = true;
-        SendPOST("/add","position="+coordinate.toString()+"&name="+gname[0]+"&label="+gname[1])
+        httprespone = SendPOST("/add","position="+coordinate.toString()+"&name="+gname[0]+"&label="+gname[1])
+        httprespone.onreadystatechange = function () {//请求后的回调接口，可将请求成功后要执行的程序写在其中
+            if(httprespone.readyState == 4 ){
+            if ( httprespone.status == 200) {//验证请求是否发送成功
+                var json = httprespone.responseText;//获取到服务端返回的数据
+                alert(json);
+            }
+            else{
+                alert("err  "+httprespone.status)
+            }
+        }
+        };
     }
     }
     );
@@ -142,15 +154,7 @@ function SendPOST(url,argc){
     /**
      * 获取数据后的处理程序
      */
-    httpRequest.onreadystatechange = function () {//请求后的回调接口，可将请求成功后要执行的程序写在其中
-        if (httpRequest.readyState == 4 && httpRequest.status == 200) {//验证请求是否发送成功
-            var json = httpRequest.responseText;//获取到服务端返回的数据
-            console.log(json);
-        }
-        else{
-            console.log("err  "+httpRequest.status)
-        }
-    };
+    return httpRequest
 }
 
 btncancle.addEventListener("click", ()=>{$("#my_dialog").hide();})
@@ -163,63 +167,88 @@ addbtn.addEventListener('click', ()=>{
 
 function search(){
     var POI = document.getElementById("POI").value;
-    var markerList = vectorSource.getFeatures();
-    var resultList = [];
-    markerList.forEach(v=>{
-        if(v.values_.label==POI){
-            resultList.push(v)
-        }
-    })
-    var resTable = document.getElementById('result');
-    var rowNum=resTable.rows.length;
-    for (i=1;i<rowNum;i++)
-    {
-        resTable.deleteRow(i);
-        rowNum=rowNum-1;
-        i=i-1;
-    }
-    resultList.forEach(v=>{
-        var trobj =document.createElement("tr");
-        var tdobj_name = document.createElement("td");
-        var tdobj_click = document.createElement("td");
-        var click = document.createElement("button")
-        var tdobj_position = document.createElement("td");
-        var tdobj_label = document.createElement("td");
-        tdobj_name.innerHTML=v.values_.name;
-        tdobj_label.innerHTML = v.values_.label;
-        tdobj_position.innerHTML=ol.proj.transform(v.values_.geometry.flatCoordinates, 'EPSG:3857', 'EPSG:4326')
-        .join(",");
-        click.innerHTML = "定位";
-        tdobj_click.appendChild(click);
-        trobj.appendChild(tdobj_name);
-        trobj.appendChild(tdobj_label);
-        trobj.appendChild(tdobj_position);
-        trobj.appendChild(tdobj_click);
-        resTable.appendChild(trobj);
-        click.addEventListener("click",function(){
-            map.getView().setCenter(v.values_.geometry.flatCoordinates);
-            var overlay = new ol.Overlay({
-                //设置弹出框的容器
-               element: container,
-               //是否自动平移，即假如标记在屏幕边缘，弹出时自动平移地图使弹出框完全可见
-               autoPan: true
-            });
-            content.innerHTML = 
-        "<p>name: " +v.values_.name+"</p>"+"<br/>"+
-        "<p>position:" +
-         ol.proj.transform(v.values_.geometry.flatCoordinates, 'EPSG:3857', 'EPSG:4326')
-        .join(",") + 
-        "</p>"+"<br/>"
-        +
-        "<p>lable:"+v.values_.label+"</p>"+"<br/>"
-        // "<img src = 'pic\\126438.png' style='length:50px,height:50px'></img>"
-        ;
-        //设置overlay的显示位置getEventPixel
-        overlay.setPosition(v.values_.geometry.flatCoordinates);
-        //显示overlay
-        map.addOverlay(  overlay);
-        })
+    httprespone = SendPOST('/search',"label="+POI)
 
-    })
+    httprespone.onreadystatechange = function () {//请求后的回调接口，可将请求成功后要执行的程序写在其中
+        if(httprespone.readyState == 4 ){
+        if ( httprespone.status == 200) {//验证请求是否发送成功
+            var json = JSON.parse( httprespone.responseText);//获取到服务端返回的数据
+            vectorSource.clear();
+            var resultList = [];
+            json.forEach(v=>{
+                var coordinate = v.fields.position.split(",");        //鼠标单击点的坐标
+                //新建一个要素ol.Feature
+            
+                var newFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(coordinate),  //几何信息
+                    name: v.fields.name,
+                    label: v.fields.label
+                });
+                newFeature.setStyle(createLabelStyle(newFeature));      //设置要素样式
+                vectorSource.addFeature(newFeature);
+            }
+                )
+                var markerList = vectorSource.getFeatures();
+
+                var resTable = document.getElementById('result');
+                var rowNum=resTable.rows.length;
+                for (i=1;i<rowNum;i++)
+                {
+                    resTable.deleteRow(i);
+                    rowNum=rowNum-1;
+                    i=i-1;
+                }
+                markerList.forEach(v=>{
+                    var trobj =document.createElement("tr");
+                    var tdobj_name = document.createElement("td");
+                    var tdobj_click = document.createElement("td");
+                    var click = document.createElement("button")
+                    var tdobj_position = document.createElement("td");
+                    var tdobj_label = document.createElement("td");
+                    tdobj_name.innerHTML=v.values_.name;
+                    tdobj_label.innerHTML = v.values_.label;
+                    tdobj_position.innerHTML=ol.proj.transform(v.values_.geometry.flatCoordinates, 'EPSG:3857', 'EPSG:4326')
+                    .join(",");
+                    click.innerHTML = "定位";
+                    tdobj_click.appendChild(click);
+                    trobj.appendChild(tdobj_name);
+                    trobj.appendChild(tdobj_label);
+                    trobj.appendChild(tdobj_position);
+                    trobj.appendChild(tdobj_click);
+                    resTable.appendChild(trobj);
+                    click.addEventListener("click",function(){
+                        map.getView().setCenter(v.values_.geometry.flatCoordinates);
+                        var overlay = new ol.Overlay({
+                            //设置弹出框的容器
+                           element: container,
+                           //是否自动平移，即假如标记在屏幕边缘，弹出时自动平移地图使弹出框完全可见
+                           autoPan: true
+                        });
+                        content.innerHTML = 
+                    "<p>name: " +v.values_.name+"</p>"+"<br/>"+
+                    "<p>position:" +
+                     ol.proj.transform(v.values_.geometry.flatCoordinates, 'EPSG:3857', 'EPSG:4326')
+                    .join(",") + 
+                    "</p>"+"<br/>"
+                    +
+                    "<p>lable:"+v.values_.label+"</p>"+"<br/>"
+                    // "<img src = 'pic\\126438.png' style='length:50px,height:50px'></img>"
+                    ;
+                    //设置overlay的显示位置getEventPixel
+                    overlay.setPosition(v.values_.geometry.flatCoordinates);
+                    //显示overlay
+                    map.addOverlay(  overlay);
+                    })
+            
+                })
+        }
+        else{
+            alert("err  "+httprespone.status)
+        }
+    }
+    };
+
+
+
     
 }

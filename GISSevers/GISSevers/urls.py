@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', Index),
     path('add',AddPOI),
+    path('search',SearchPOI)
 ]

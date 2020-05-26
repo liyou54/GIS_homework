@@ -1,6 +1,6 @@
 from django.shortcuts import render,HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.core import serializers
 
 from .models import POIModels
 
@@ -17,3 +17,11 @@ def AddPOI(request):
         poi.label = request.POST.get("label")
         poi.save()
         return HttpResponse("status:200")
+
+@csrf_exempt
+def SearchPOI(request):
+    if(request.method == "POST"):
+        poiqueryset = POIModels.objects.filter(label = request.POST.get("label"))
+        data = serializers.serialize('json', queryset=poiqueryset)
+        # 3. 返回
+        return HttpResponse(data)
