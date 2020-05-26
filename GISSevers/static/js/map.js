@@ -89,7 +89,7 @@ function createLabelStyle(feature){
             anchorYUnits: 'pixels',         //锚点Y值单位
             offsetOrigin: 'top-right',      //偏移原点
             opacity: 0.75,
-            src: 'pic/11.png'  //图标的URL
+            src: '/static/pic/11.png'  //图标的URL
         }),
         text: new ol.style.Text({
             textAlign: 'center',            //位置
@@ -116,9 +116,6 @@ function create_paper_save(){
     map.on('click', function(evt){
         if(!cl){
         var gname = [$("#name").val(),$("#kind").val()]
-        // if(!gname){
-        //     return;
-        // }
         var coordinate = evt.coordinate;        //鼠标单击点的坐标
         //新建一个要素ol.Feature
     
@@ -131,10 +128,31 @@ function create_paper_save(){
         vectorSource.addFeature(newFeature);
         $("#my_dialog").hide();
         cl = true;
+        SendPOST("/add","position="+coordinate.toString()+"&name="+gname[0]+"&label="+gname[1])
     }
     }
     );
 }
+
+function SendPOST(url,argc){
+    var httpRequest = new XMLHttpRequest();//第一步：创建需要的对象
+    httpRequest.open('POST', url, true); //第二步：打开连接/***发送json格式文件必须设置请求头 ；如下 - */
+    httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");//设置请求头 注：post方式必须设置请求头（在建立连接后设置请求头）var obj = { name: 'zhansgan', age: 18 };
+    httpRequest.send(argc);//发送请求
+    /**
+     * 获取数据后的处理程序
+     */
+    httpRequest.onreadystatechange = function () {//请求后的回调接口，可将请求成功后要执行的程序写在其中
+        if (httpRequest.readyState == 4 && httpRequest.status == 200) {//验证请求是否发送成功
+            var json = httpRequest.responseText;//获取到服务端返回的数据
+            console.log(json);
+        }
+        else{
+            console.log("err  "+httpRequest.status)
+        }
+    };
+}
+
 btncancle.addEventListener("click", ()=>{$("#my_dialog").hide();})
 btnsave.addEventListener('click',create_paper_save)
 addbtn.addEventListener('click', ()=>{

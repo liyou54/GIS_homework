@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'POI'
 ]
 
 MIDDLEWARE = [
@@ -54,7 +55,7 @@ ROOT_URLCONF = 'GISSevers.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +70,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'GISSevers.wsgi.application'
 
+STATICFILES_DIRS = [  os.path.join(BASE_DIR,"static"),
 
+]
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -103,9 +106,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'zh-hans' #使用中国语言
+TIME_ZONE = 'Asia/Shanghai' #使用中国上海时间
 
 USE_I18N = True
 
